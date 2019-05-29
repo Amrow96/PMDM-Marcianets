@@ -2,224 +2,279 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+import java.util.ArrayList;
 import java.util.Random;
 
-public class MyGdxGame extends ApplicationAdapter implements  InputProcessor {
-	private SpriteBatch batch;
-	private SpriteBatch batchDisparo;
-	private SpriteBatch batchEnemic;
-	private int AMPLADA;
-	private int ALTURA;
-	private Sprite jugador;
-	private Sprite enemy;
-	private Texture imgplayer;
-	private Texture imgEnemigo;
-	private Texture imgDisparo;
-	private int yDisparo;
-	private int xDisparo;
-	private int[] xEnemigo;
-	private int[] yEnemigo;
-	private int x;
-	private boolean fideljoc = false;
+public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
+	// Constants
+	public static final int MAX_NAUS_ENEMIGUES = 7;
+	public static final int MOVIMENT = 15;
+	public static final int NUM_VIDES = 3;
+	public static final int VIDA_JUGADOR = 100;
 
+	// Tamany de la pantalla.
+	public static float screenWidth;
+	public static float screenHeight;
+
+	// Textures del joc.
+	public static Texture nauAliada;
+	public static Texture nauEnemiga;
+	public static Texture tret;
+
+	// Sprites del joc.
+	public static Sprite nau;
+	public static NauEnemiga nauEnem;
+
+	// Informació de la partida.
+	public static int puntuacio;
+	public static int vida;
+	// Vectors
+	public static ArrayList<Sprite> vides;
+	public static ArrayList<TretNauAliada> trets;
+	public static ArrayList<NauEnemiga> nausEnemigues;
+	public static ArrayList<TretNauEnemiga> tretsEnemics;
+
+	// Objecte SpriteBatch que permet dibuixar en la pantalla
+	private SpriteBatch batch;	// Objecte SpriteBatch que permet dibuixar en la pantalla
+
+	// Posició de la nau aliada a la pantalla.
+	private float posX;
+
+	// Objecte que permet escriure text a la pantalla
+	BitmapFont font;
+	ShapeRenderer shapeRenderer;
+
+	/**
+	 * Crea els objectes i els hi dóna una posició inicial
+	 */
 	@Override
-	public void create() {
+	public void create () {
+		// Creem l'objecte que permetrà situar objectes a la pantalla
+		batch = new SpriteBatch();
+		shapeRenderer = new ShapeRenderer();
 		Gdx.input.setInputProcessor(this);
 
-		AMPLADA = Gdx.graphics.getWidth();
-		ALTURA = Gdx.graphics.getHeight();
+		screenWidth = Gdx.graphics.getWidth();
+		screenHeight = Gdx.graphics.getHeight();
+
+		vides = new ArrayList<Sprite>();
+		trets = new ArrayList<TretNauAliada>();
+		nausEnemigues = new ArrayList<NauEnemiga>();
+		tretsEnemics = new ArrayList<TretNauEnemiga>();
+
+		nauAliada = new Texture("nau1.png");
+		nauEnemiga = new Texture("nau2.png");
+		tret = new Texture("tret.png");
+
+		posX = (screenWidth / 2);
+
+		vida = VIDA_JUGADOR;
+		puntuacio = 0;
+
+		generarVides();
+		generarNausEnemigues();
+
+		// Creem el Sprite per la nau.
+		nau = new Sprite(nauAliada, 0, 0, nauAliada.getWidth(), nauAliada.getHeight());
+		nau.setX(posX);
+		nau.setY(nauAliada.getHeight() + 15);
 
 
-		yEnemigo = new int[7];
-		xEnemigo = new int[7];
+		//nau = new Sprite(nauTexture, 0, 0, nauTexture.getWidth(), nauTexture.getHeight());
+		//nauEnemiga = new Sprite(enemigaTexture, 0, 0, enemigaTexture.getWidth(), enemigaTexture.getHeight());
 
-		batchDisparo = new SpriteBatch();
-		imgDisparo = new Texture("tret.png");
-
-		batch = new SpriteBatch();
-		imgplayer = new Texture("nau1.png");
-//		x = (int) (AMPLADA - jugador.getWidth()) / 2;
-
-
-
-		batchEnemic = new SpriteBatch();
-		imgEnemigo = new Texture("nau2.png");
-
-		jugador = new Sprite(imgplayer,0,0,imgplayer.getWidth(),imgplayer.getHeight());
-		jugador.setX((AMPLADA - jugador.getWidth()) / 2);
-		jugador.setY(20);
-
-
-		//thread disparo
-		Thread t = new Thread(){
-			public void run(){
-				while (fideljoc == false) {
-					//Moviment perpetu de la bala
-					for (yDisparo = 40; yDisparo < ALTURA; yDisparo++) {
-						try {
-							Thread.sleep(5);
-
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-		};
-		t.start();
-
-		Thread thread = new Thread() {
-			public void run() {
-				while (fideljoc == false) {
-					int modificador = 0;
-					for (int i = 0; i < xEnemigo.length; i++) {
-						if (yEnemigo[i] > 200) {
-							yEnemigo[i]--;
-							yEnemigo[i] -= modificador;
-						} else {
-							yEnemigo[i]++;
-							yEnemigo[i] += modificador;
-						}
-
-						if (xEnemigo[i] > (AMPLADA - jugador.getWidth())) {
-							xEnemigo[i]--;
-							xEnemigo[i]-= modificador;
-
-						} else {
-							xEnemigo[i]++;
-							xEnemigo[i]+= modificador;
-
-
-						}
-						modificador++;
-						try {
-							Thread.sleep(2);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-
-				}
-			}
-		};
-		thread.start();
-
+		// Creem l'objecte per dibuixar a la pantalla
+		font = new BitmapFont();
 	}
 
+	public static void generarVides() {
+		int distancia = 0;
+
+		for (int i = 0; i < NUM_VIDES; i++) {
+			distancia += nauAliada.getWidth() + 10;
+			nau = new Sprite(nauAliada, 0, 0, nauAliada.getWidth(), nauAliada.getHeight());
+			nau.setX(screenWidth - distancia);
+			nau.setY(5);
+
+			vides.add(nau);
+		}
+	}
+
+	public static void generarNausEnemigues() {
+		int tempX;
+
+		for (int i = 0; i < MAX_NAUS_ENEMIGUES; i++) {
+			do {
+				Random random = new Random();
+				tempX = random.nextInt((int)(screenWidth - nauEnemiga.getWidth()));
+			} while ((tempX < nauEnemiga.getWidth()) || (tempX > (screenWidth - nauEnemiga.getWidth())));
+
+			nauEnem = new NauEnemiga(nauEnemiga, 0, 0, nauEnemiga.getWidth(), nauEnemiga.getHeight(), tempX);
+			nausEnemigues.add(nauEnem);
+			Thread thread = new Thread(nauEnem);
+			thread.start();
+		}
+	}
+
+	/**
+	 * Renderitza, o sigui, redibuixa la pantalla. Aquest mètode es cridant de manera reiterada i
+	 * constant i s'encarrega de refrescar la pantalla.
+	 */
 	@Override
-	public void render() {
+	public void render () {
+		// Netejem la pantalla, deixant un fons vermell
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		//pintem i coloquem al mig a la nau jugadora
+		// Iniciem el dibuix de la pantalla
 		batch.begin();
-		batch.draw(imgplayer,x ,40);
+
+		if (vida == 0 && vides.size() > 0) {
+			vides.remove(0);
+			vida = VIDA_JUGADOR;
+		}
+		if (vides.size() > 0) {
+			for (Sprite vida : vides) {
+				vida.draw(batch);
+			}
+
+			for (TretNauAliada t : trets) {
+				t.draw(batch);
+			}
+
+			for (NauEnemiga ne : nausEnemigues) {
+				ne.draw(batch);
+			}
+
+			for (TretNauEnemiga tne : tretsEnemics) {
+				tne.draw(batch);
+			}
+
+			nau.draw(batch);
+
+			// Dibuixem el text
+			font.draw(batch, "SCORE: " + puntuacio + " VIDES: " + vides.size() + " VIDA: " + vida, 15, 20);
+		} else {
+			font.draw(batch, "GAME OVER", screenWidth/2, screenHeight/2);
+		}
+
+		// Acabem el dibuix de la pantalla
 		batch.end();
 
-		//Imprimim tots els enemics
-		for (int i = 0; i < xEnemigo.length; i++) {
-			batchEnemic.begin();
-			batchEnemic.draw(imgEnemigo, (xEnemigo[i] = (AMPLADA / 2)),( yEnemigo[i] = 800));
-			batchEnemic.end();
-		}
-
-		batchDisparo.begin();
-		batchDisparo.draw(imgDisparo, (x + (jugador.getWidth() / 2)), yDisparo);
-		batchDisparo.end();
-
+		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+		shapeRenderer.setColor(1, 1, 1, 1);
+		shapeRenderer.line(0, nauAliada.getHeight() + 10, screenWidth, nauAliada.getHeight() + 10);
+		shapeRenderer.end();
 	}
 
-	@Override
-	public void dispose() {
-		batch.dispose();
-		imgplayer.dispose();
-	}
-
+	/**
+	 * Controla quan premem una tecla qualsevol del teclat. En el nostre cas, movem el porter a la
+	 * dreta o esquerra en funció de la tecla polsada.
+	 * @param keycode	Codi corresponent a la tecla polsada
+	 * @return
+	 */
 	@Override
 	public boolean keyDown(int keycode) {
-		switch (keycode){
+		switch(keycode) {
+			// Cursor (fletxa) esquerre
 			case Input.Keys.DPAD_LEFT:
-				for (x = ((int) jugador.getX()); x > 0; x--) {//Esquerra
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+				if (posX > 0) {
+					posX -= MOVIMENT;
+					nau.setX(posX);
 				}
 				break;
+
+			// Cursor (fletxa) dret
 			case Input.Keys.DPAD_RIGHT:
-				for (x = ((int) jugador.getX()); x < AMPLADA - imgplayer.getWidth(); x++) {//Dreta
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+				if ((posX + MOVIMENT) < (screenWidth - nauAliada.getWidth() / 2)) {
+					posX += MOVIMENT;
+					nau.setX(posX);
 				}
 				break;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean keyUp(int keycode) {
-		return false;
-	}
-
-	@Override
-	public boolean keyTyped(char character) {
-		return false;
-	}
-
-	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-
-		int time = 10;
-		if (screenX < (AMPLADA / 2)) {
-			for (x = ((int) jugador.getX()); x > 0; x--) {//Esquerra
-				try {
-					Thread.sleep(time);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+			case Input.Keys.SPACE:
+				if (trets.size() < 20) {
+					TretNauAliada nouTtret = new TretNauAliada(tret, 0, 0, tret.getWidth(), tret.getHeight(), nau.getX() + nau.getWidth() / 2);
+					trets.add(nouTtret);
+					Thread thread = new Thread(nouTtret);
+					thread.start();
+					System.out.println(trets.size());
 				}
-			}
-		} else {
-			for (x = ((int) jugador.getX()); x < AMPLADA - imgplayer.getWidth(); x++) {//Dreta
-				try {
-					Thread.sleep(time);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
 		}
+
+		return false;
+	}
+
+	/**
+	 * Es pot utilitzar per controlar quan es deixa anar una tecla prèviament polsada
+	 * @param keycode
+	 * @return
+	 */
+	@Override
+	public boolean keyUp(int keycode)
+	{
 		return false;
 	}
 
 	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+	public boolean keyTyped(char character)
+	{
+		return false;
+	}
+
+	/**
+	 * Controla quan toquem la pantalla. En el nostre cas, utilitzem el mètode per saber la posició
+	 * inicial del porter abans de moure'l.
+	 * @param screenX	// Posició X on l'usuari ha tocat la pantalla
+	 * @param screenY	// Posició Y on l'usuari ha tocat la pantalla
+	 * @param pointer
+	 * @param button
+	 * @return
+	 */
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) { return false; }
+
+	/**
+	 * Controla quan aixequem el dit després d'arrossegar-lo per la pantalla. En el nostre cas,
+	 * utilitzem el mètode per saber la posició on hem aixecat el dit, la comparem amb la posició on
+	 * va prèmer el dit i calculem el desplaçament del porter, situant-lo en la nova posició.
+	 * @param screenX	// Posició X on l'usuari ha tocat la pantalla
+	 * @param screenY	// Posició Y on l'usuari ha tocat la pantalla
+	 * @param pointer
+	 * @param button
+	 * @return
+	 */
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) { return false; }
+
+	/**
+	 * Controla la posició del dit quan l'anem arrossegant per la pantalla. En el nostre cas,
+	 * utilitzem el mètode anar redibuixant la posició del porter a mesura que desplacem el dit.
+	 * @param screenX	// Posició X on l'usuari ha tocat la pantalla
+	 * @param screenY	// Posició Y on l'usuari ha tocat la pantalla
+	 * @param pointer
+	 * @return
+	 */
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) { return false; }
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY)
+	{
 		return false;
 	}
 
 	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) {
+	public boolean scrolled(int amount)
+	{
 		return false;
 	}
-
-	@Override
-	public boolean mouseMoved(int screenX, int screenY) {
-		return false;
-	}
-
-	@Override
-	public boolean scrolled(int amount) {
-		return false;
-	}
-
 }
