@@ -37,6 +37,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	// Informació de la partida.
 	public static int puntuacio;
 	public static int vida;
+
 	// Vectors
 	public static ArrayList<Sprite> vides;
 	public static ArrayList<TretNauAliada> trets;

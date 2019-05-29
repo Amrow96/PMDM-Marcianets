@@ -62,7 +62,7 @@ public class TretNauEnemiga extends Sprite implements Runnable {
         if (MyGdxGame.vides.size() > 0) {
             if ((this.getX() >= MyGdxGame.nau.getX() && this.getX() <= nauX) && (this.getY() >= MyGdxGame.nau.getY() && this.getY() <= nauY)) {
                 col = true;
-                // Resta una vida de la nau enemiga.
+                // Resta una vida de la nau amiga.
                 MyGdxGame.vida -= 1;
             }
         }
