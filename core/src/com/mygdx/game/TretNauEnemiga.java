@@ -33,8 +33,9 @@ public class TretNauEnemiga extends Sprite implements Runnable {
                 dist = Math.sqrt(destX * destX + destY * destY);
                 destX = destX / dist;
                 destY = destY / dist;
-                posX += destX * 0.5;
-                posY += destY * 0.5;
+              //  posX += destX ;
+                posY += destY ;
+
 
                 Thread.sleep(3);
                 this.setY(posY);
@@ -69,4 +70,5 @@ public class TretNauEnemiga extends Sprite implements Runnable {
 
         return col;
     }
+
 }

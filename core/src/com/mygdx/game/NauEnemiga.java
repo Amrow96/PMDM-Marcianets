@@ -8,8 +8,8 @@ import java.util.Random;
 public class NauEnemiga extends Sprite implements Runnable {
     private float posX;
     private float posY;
-    private int dirX;
-    private int dirY;
+    private float dirX;
+    private float dirY;
     private Texture vivaTexture;
     private Texture eliminadaTexture = new Texture("nau2e.png");
     private boolean hasDir = false;
@@ -59,27 +59,9 @@ public class NauEnemiga extends Sprite implements Runnable {
     }
 
     public void generarDireccions() {
-        Random r = new Random();
-        int rand = r.nextInt(4);
 
-        switch (rand) {
-            case 1:
-                dirX = 1;
-                dirY = 1;
-                break;
-            case 2:
-                dirX = -1;
-                dirY = -1;
-                break;
-            case 3:
-                dirX = -1;
-                dirY = 1;
-                break;
-            case 0:
-                dirX = 1;
-                dirY = -1;
-                break;
-        }
+        dirX = (float) (Math.random() * 4 - 2);
+        dirY = (float) (Math.random() * 4 - 2);
     }
 
     public void moverse() {
